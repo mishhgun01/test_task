@@ -47,6 +47,7 @@ func statistics(data []IncomingData) (GasStatistics, error) {
 		if strconv.Itoa(date.Hour()) != currentHour {
 			currentHour = strconv.Itoa(date.Hour())
 			pricePerHour = item.GasPrice
+			mapOfHourPrices[currentHour] = append(mapOfHourPrices[currentHour], pricePerHour)
 		} else {
 			mapOfHourPrices[currentHour] = append(mapOfHourPrices[currentHour], pricePerHour)
 		}

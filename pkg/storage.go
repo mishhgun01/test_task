@@ -28,9 +28,12 @@ func NewStorage(conn string, dur time.Duration) *Storage {
 func (s *Storage) GetData() (GasStatistics, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	data := s.client.Get(time.Now().Month().String() + strconv.Itoa(time.Now().Day())).String()
+	data, err := s.client.Get(time.Now().Month().String() + strconv.Itoa(time.Now().Hour())).Result()
+	if err != nil {
+		return GasStatistics{}, err
+	}
 	var output GasStatistics
-	err := json.Unmarshal([]byte(data), &output)
+	err = json.Unmarshal([]byte(data), &output)
 	if err != nil {
 		return GasStatistics{}, err
 	}
@@ -38,8 +41,10 @@ func (s *Storage) GetData() (GasStatistics, error) {
 }
 
 // загрузка данных в кэш
-func (s *Storage) UpdateData(data GasStatistics) {
+func (s *Storage) UpdateData(data GasStatistics) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.client.Set(time.Now().Month().String()+strconv.Itoa(time.Now().Day()), data, s.dur)
+	jsonData, err := json.Marshal(data)
+	s.client.Set(time.Now().Month().String()+strconv.Itoa(time.Now().Hour()), jsonData, s.dur)
+	return err
 }

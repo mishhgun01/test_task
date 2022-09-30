@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gorilla/mux"
 	"log"
 	"test_task/pkg"
@@ -9,18 +8,10 @@ import (
 )
 
 func main() {
-	var conn, addr string
-	fmt.Print("enter connection:")
-	_, err := fmt.Scanln(&conn)
-	fmt.Print("enter adress:port:")
-	_, err = fmt.Scanln(&addr)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-	s := pkg.NewStorage(conn, time.Hour*24)
+	s := pkg.NewStorage("127.0.0.1:6379", time.Hour)
 	api := pkg.New(mux.NewRouter(), s)
 	api.Handle()
-	err = api.ListenAndServe(addr)
+	err := api.ListenAndServe("localhost:8080")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
