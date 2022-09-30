@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// Кэш приходящей статистики
+// Кэш вычисляемой статистики
 type Storage struct {
 	mu     sync.Mutex
 	client *redis.Client
@@ -47,4 +47,14 @@ func (s *Storage) UpdateData(data GasStatistics) error {
 	jsonData, err := json.Marshal(data)
 	s.client.Set(time.Now().Month().String()+strconv.Itoa(time.Now().Hour()), jsonData, s.dur)
 	return err
+}
+
+func (s *Storage) ClearAll() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.client.FlushAll().Err()
+}
+
+func (s *Storage) Close() error {
+	return s.client.Close()
 }
