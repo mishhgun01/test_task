@@ -28,7 +28,7 @@ func NewStorage(conn string, dur time.Duration) *Storage {
 func (s *Storage) GetData() (GasStatistics, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	data, err := s.client.Get(time.Now().Month().String() + strconv.Itoa(time.Now().Hour())).Result()
+	data, err := s.client.Get(strconv.Itoa(time.Now().Year()) + "/" + time.Now().Month().String() + "/" + strconv.Itoa(time.Now().Day()) + "/" + strconv.Itoa(time.Now().Hour())).Result()
 	if err != nil {
 		return GasStatistics{}, err
 	}
@@ -45,7 +45,7 @@ func (s *Storage) UpdateData(data GasStatistics) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	jsonData, err := json.Marshal(data)
-	s.client.Set(time.Now().Month().String()+strconv.Itoa(time.Now().Hour()), jsonData, s.dur)
+	s.client.Set(strconv.Itoa(time.Now().Year())+"/"+time.Now().Month().String()+"/"+strconv.Itoa(time.Now().Day())+"/"+strconv.Itoa(time.Now().Hour()), jsonData, s.dur)
 	return err
 }
 
