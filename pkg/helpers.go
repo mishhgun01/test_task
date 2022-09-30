@@ -7,42 +7,42 @@ import (
 
 // helpers - вспомогательные функции, в частности, для подсчета статистики
 
-func statistics(data []IncomingData) (gasStatistics, error) {
+func statistics(data []IncomingData) (GasStatistics, error) {
 	var currentMonth string
 	var currentDay string
 	var currentHour string
-	var output gasStatistics
+	var output GasStatistics
 	var currGasVal float64
 	var currGasPrice float64
 	var aGasVal float64
 	var aGasPrice float64
 	var pricePerHour float64
 	var mapOfHourPrices = make(map[string][]float64)
-	output.wastePerMonth = make(map[string]float64)
-	output.pricePerHour = make(map[string]float64)
-	output.averagePricePerDay = make(map[string]float64)
+	output.WastePerMonth = make(map[string]float64)
+	output.PricePerHour = make(map[string]float64)
+	output.AveragePricePerDay = make(map[string]float64)
 	for _, item := range data {
 		date, err := time.Parse("06-01-02 15:04", item.Time)
 		if err != nil {
-			return gasStatistics{}, err
+			return GasStatistics{}, err
 		}
 		// поторачено за месяц
 		if date.Month().String() != currentMonth {
 			currentMonth = date.Month().String()
 			currGasVal = item.GasValue
-			output.wastePerMonth[currentMonth] = currGasVal
+			output.WastePerMonth[currentMonth] = currGasVal
 		} else {
-			output.wastePerMonth[currentMonth] = currGasVal - item.GasValue
+			output.WastePerMonth[currentMonth] = currGasVal - item.GasValue
 		}
 		// средняя цена за день
 		if date.Month().String()+strconv.Itoa(date.Day()) != currentDay {
 			currentDay = date.Month().String() + strconv.Itoa(date.Day())
 			currGasPrice = item.GasPrice
-			output.averagePricePerDay[currentDay] = currGasPrice
+			output.AveragePricePerDay[currentDay] = currGasPrice
 		} else {
 			currGasPrice += item.GasPrice
 			sum := currGasPrice / float64(daysOfMonth(date.Month().String()))
-			output.averagePricePerDay[currentDay] = sum
+			output.AveragePricePerDay[currentDay] = sum
 		}
 		if strconv.Itoa(date.Hour()) != currentHour {
 			currentHour = strconv.Itoa(date.Hour())
@@ -54,9 +54,9 @@ func statistics(data []IncomingData) (gasStatistics, error) {
 		aGasVal += item.GasValue
 	}
 	for k, v := range mapOfHourPrices {
-		output.pricePerHour[k] = averageOfFloats(v)
+		output.PricePerHour[k] = averageOfFloats(v)
 	}
-	output.paid = aGasVal * aGasVal
+	output.Paid = aGasVal * aGasVal
 	return output, nil
 }
 

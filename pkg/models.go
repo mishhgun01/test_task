@@ -1,10 +1,10 @@
 package pkg
 
-type gasStatistics struct {
-	wastePerMonth      map[string]float64
-	averagePricePerDay map[string]float64
-	pricePerHour       map[string]float64
-	paid               float64
+type GasStatistics struct {
+	WastePerMonth      map[string]float64
+	AveragePricePerDay map[string]float64
+	PricePerHour       map[string]float64
+	Paid               float64
 }
 
 type Request struct {

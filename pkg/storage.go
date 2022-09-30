@@ -3,6 +3,7 @@ package pkg
 import (
 	"encoding/json"
 	"github.com/go-redis/redis"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -24,32 +25,21 @@ func NewStorage(conn string, dur time.Duration) *Storage {
 }
 
 // получение данных из кэша
-func (s *Storage) GetData() ([]IncomingData, error) {
+func (s *Storage) GetData() (GasStatistics, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	data := s.client.MGet().String()
-	var output []IncomingData
+	data := s.client.Get(time.Now().Month().String() + strconv.Itoa(time.Now().Day())).String()
+	var output GasStatistics
 	err := json.Unmarshal([]byte(data), &output)
 	if err != nil {
-		return nil, err
+		return GasStatistics{}, err
 	}
 	return output, nil
 }
 
 // загрузка данных в кэш
-func (s *Storage) UpdateData(data Request) error {
+func (s *Storage) UpdateData(data GasStatistics) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
-	for _, transaction := range data.Data {
-		for _, items := range transaction {
-			for _, item := range items {
-				err := s.client.Set(item.Time, item, s.dur).Err()
-				if err != nil {
-					return err
-				}
-			}
-		}
-	}
-	return nil
+	s.client.Set(time.Now().Month().String()+strconv.Itoa(time.Now().Day()), data, s.dur)
 }

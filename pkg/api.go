@@ -35,7 +35,17 @@ func (api *API) gasStats(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		err = api.cache.UpdateData(req)
+		var output GasStatistics
+		for _, transaction := range req.Data {
+			for _, items := range transaction {
+				output, err = statistics(items)
+				if err != nil {
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+			}
+		}
+		api.cache.UpdateData(output)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -47,12 +57,7 @@ func (api *API) gasStats(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		stats, err := statistics(data)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		output, err := json.Marshal(stats)
+		output, err := json.Marshal(data)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
